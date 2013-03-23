@@ -26,7 +26,6 @@ class FD(object):
         if stat_result is None:
             stat_result = os.fstat(fd)
         self._stat_result = stat_result
-        self.mode & stat.S_IFMT
 
     @property
     def mode(self):
@@ -34,7 +33,7 @@ class FD(object):
     
     @property
     def typestr(self):
-        return _TYPE_LOOKUP.get(self.mode & stat.S_IFMT, "unknown")
+        return _TYPE_LOOKUP.get(stat.S_IFMT(self.mode), "unknown")
 
     def __int__(self):
         return self.fd
