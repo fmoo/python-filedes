@@ -1,5 +1,11 @@
 import stat
 import os
+import platform
+
+
+_USE_EXTENSION = set([
+    'Darwin',
+])
 
 _TYPE_LOOKUP = {
     stat.S_IFBLK: "block",
@@ -37,11 +43,14 @@ class FD(object):
         return "<%s file (%d)>" % (self.typestr, self.fd)
 
 
-def get_open_fds(pid=None):
-    if pid is None:
-        pid = os.getpid()
+if platform.system() in _USE_EXTENSION:
+    from _fdinfo import get_open_fds
+else:
+    def get_open_fds(pid=None):
+        if pid is None:
+            pid = os.getpid()
 
-    return [int(fd) for fd in os.listdir("/proc/%d/fd" % (pid))]
+        return [int(fd) for fd in os.listdir("/proc/%d/fd" % (pid))]
 
 
 if __name__ == '__main__':
