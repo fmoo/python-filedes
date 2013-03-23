@@ -9,7 +9,18 @@ if __name__ == '__main__':
     kwargs = dict(
         name='fdinfo',
         version='0.1',
+        description="Work with file descriptors in a more human way",
         py_modules=['fdinfo'],
+        author='Peter Ruibal',
+        author_email='ruibalp@gmail.com',
+        license='ISC',
+        keywords='file-descriptor',
+        url='http://github.com/fmoo/python-fdinfo',
+
+        classifiers=[
+            "Development Status :: 3 - Alpha",
+            "License :: OSI Approved :: ISC License (ISCL)",
+        ],
     )
 
     # Add extension modules (as necessary)
