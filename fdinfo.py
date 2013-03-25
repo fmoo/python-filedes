@@ -21,6 +21,7 @@ except ImportError:
 
 
 _TYPE_LOOKUP = {
+    000: "anon_inode",
     stat.S_IFBLK: "block",
     stat.S_IFCHR: "character",
     stat.S_IFDIR: "directory",
