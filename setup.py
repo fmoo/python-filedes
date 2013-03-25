@@ -2,7 +2,8 @@ from setuptools import setup, Extension
 import platform
 
 PLATFORM_EXTENSIONS = {
-    'Darwin': [Extension('_fdinfo', ['ext/darwin_fdinfo.c'])]
+    'Darwin': [Extension('_fdinfo', ['ext/darwin_fdinfo.c'])],
+    'Linux': [Extension('_fdinfo', ['ext/linux_fdinfo.c'])],
 }
 
 if __name__ == '__main__':

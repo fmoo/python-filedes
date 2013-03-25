@@ -1,11 +1,24 @@
 import stat
 import os
-import platform
+
+try:
+    import _fdinfo
+    get_open_fds = _fdinfo.get_open_fds
+except ImportError:
+    import warnings
+    warnings.warn("Error importing extension module.  "
+                  "Some functionality may be broken")
+
+    def get_open_fds(pid=None):
+        if pid is None:
+            pid = os.getpid()
+
+        return [int(fd) for fd in os.listdir("/proc/%d/fd" % (pid))]
+
+    def stat_pid_fd(pid, fd):
+        return os.stat("/proc/%d/fd/%d" % (pid, fd))
 
 
-_USE_EXTENSION = set([
-    'Darwin',
-])
 
 _TYPE_LOOKUP = {
     stat.S_IFBLK: "block",
@@ -17,7 +30,6 @@ _TYPE_LOOKUP = {
     stat.S_IFSOCK: "socket",
     0160000: "whiteout",
 }
-
 
 
 class FD(object):
@@ -41,15 +53,6 @@ class FD(object):
     def __repr__(self):
         return "<%s file (%d)>" % (self.typestr, self.fd)
 
-
-if platform.system() in _USE_EXTENSION:
-    from _fdinfo import get_open_fds
-else:
-    def get_open_fds(pid=None):
-        if pid is None:
-            pid = os.getpid()
-
-        return [int(fd) for fd in os.listdir("/proc/%d/fd" % (pid))]
 
 
 if __name__ == '__main__':
