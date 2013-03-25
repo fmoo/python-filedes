@@ -83,7 +83,11 @@ if __name__ == '__main__':
     ap.add_argument("pids", nargs="*", default=[None], type=int, metavar="PID")
     ns = ap.parse_args()
     for pid in ns.pids:
-        for fd in get_open_fds(pid):
+        if pid is None:
+            open_fds = get_open_fds()
+        else:
+            open_fds = get_open_fds(pid)
+        for fd in open_fds:
             try:
                 print FD(fd, pid=pid)
             except OSError as e:
