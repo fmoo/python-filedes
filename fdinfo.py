@@ -62,5 +62,15 @@ class FD(object):
 
 
 if __name__ == '__main__':
-    for fd in get_open_fds():
-        print FD(fd)
+    import errno
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("pids", nargs="*", default=[None], type=int, metavar="PID")
+    ns = ap.parse_args()
+    for pid in ns.pids:
+        for fd in get_open_fds(pid):
+            try:
+                print FD(fd, pid=pid)
+            except OSError as e:
+                if e.errno == errno.EBADF:
+                    print "%d: EBADF" % fd
