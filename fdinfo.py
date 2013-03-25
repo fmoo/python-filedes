@@ -50,7 +50,8 @@ class FD(object):
     
     @property
     def typestr(self):
-        return _TYPE_LOOKUP.get(stat.S_IFMT(self.mode), "unknown")
+        return _TYPE_LOOKUP.get(stat.S_IFMT(self.mode),
+                                "unknown (0%o)" % stat.S_IFMT(self.mode))
 
     def __int__(self):
         return self.fd
