@@ -40,12 +40,12 @@ fdinfo_get_open_fds(PyObject *self, PyObject *args)
     int i;
     for(i = 0; i < numberOfProcFDs; i++) {
         //printf("FD #%d: %d\n", procFDInfo[i].proc_fd, procFDInfo[i].proc_fdtype);
-        PyObject *iPid = Py_BuildValue("i", procFDInfo[i].proc_fd);
-        if (!iPid) {
+        PyObject *ifd = Py_BuildValue("i", procFDInfo[i].proc_fd);
+        if (!ifd) {
             goto cleanup_error;
         }
-        int append_result = PyList_Append(result, iPid);
-        Py_DECREF(iPid);
+        int append_result = PyList_Append(result, ifd);
+        Py_DECREF(ifd);
         if (append_result == -1) {
             goto cleanup_error;
         }
@@ -67,7 +67,6 @@ static PyMethodDef FDInfoMethods[] = {
     },
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
-
 
 
 PyMODINIT_FUNC
