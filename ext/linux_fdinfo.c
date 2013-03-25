@@ -59,7 +59,7 @@ fdinfo_get_open_fds(PyObject *self, PyObject *args)
 
         // skip the fd associated with the opendir()
         if (skipfd == fd) {
-            continue;
+            goto next_dirent;
         }
 
         PyObject *ifd = Py_BuildValue("i", fd);
