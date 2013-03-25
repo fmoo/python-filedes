@@ -34,10 +34,14 @@ _TYPE_LOOKUP = {
 
 
 class FD(object):
-    def __init__(self, fd, stat_result=None):
+    def __init__(self, fd, stat_result=None, pid=None):
         self.fd = fd
         if stat_result is None:
-            stat_result = os.fstat(fd)
+            if pid is None or pid == os.getpid():
+                stat_result = os.fstat(fd)
+            else:
+                stat_result = stat_pid_fd(pid, fd)
+
         self._stat_result = stat_result
 
     @property
