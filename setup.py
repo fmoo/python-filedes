@@ -11,7 +11,7 @@ if __name__ == '__main__':
         name='fdinfo',
         version='0.1',
         description="Work with file descriptors in a more human way",
-        py_modules=['fdinfo'],
+        packages=['fdinfo'],
         author='Peter Ruibal',
         author_email='ruibalp@gmail.com',
         license='ISC',

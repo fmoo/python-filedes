@@ -1,23 +1,11 @@
 import stat
 import os
 
-try:
-    import _fdinfo
-    get_open_fds = _fdinfo.get_open_fds
-except ImportError:
-    import warnings
-    warnings.warn("Error importing extension module.  "
-                  "Some functionality may be broken")
+import _fdinfo
+get_open_fds = _fdinfo.get_open_fds
 
-    def get_open_fds(pid=None):
-        if pid is None:
-            pid = os.getpid()
-
-        return [int(fd) for fd in os.listdir("/proc/%d/fd" % (pid))]
-
-    def stat_pid_fd(pid, fd):
-        return os.stat("/proc/%d/fd/%d" % (pid, fd))
-
+def stat_pid_fd(pid, fd):
+    return os.stat("/proc/%d/fd/%d" % (pid, fd))
 
 
 _TYPE_LOOKUP = {
