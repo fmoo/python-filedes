@@ -22,15 +22,11 @@ _TYPE_LOOKUP = {
 }
 
 
-class FD(object):
-    def __init__(self, fd, stat_result=None, pid=None):
+class _FileDescriptor(object):
+    """Base class for local and remote file descriptors"""
+    def __init__(self, fd, stat_result, pid):
         self.fd = fd
-        if stat_result is None:
-            if pid is None or pid == os.getpid():
-                stat_result = os.fstat(fd)
-            else:
-                stat_result = stat_pid_fd(pid, fd)
-
+        self.pid = pid
         self._stat_result = stat_result
 
     @property
@@ -46,8 +42,38 @@ class FD(object):
         return self.fd
 
     def __repr__(self):
-        return "<%s file (%d)>" % (self.typestr, self.fd)
+        return "<%s %s file #%d>" % (self.LOCAL, self.typestr, self.fd)
 
+
+class LocalFileDescriptor(_FileDescriptor):
+    """A file descriptor belonging to the current process"""
+    LOCAL = "local"
+
+
+class RemoteFileDescriptor(_FileDescriptor):
+    """A file descriptor belonging to another process"""
+    LOCAL = "remote"
+
+
+def FD(fd, stat_result=None, pid=None):
+    if pid is None:
+        pid = os.getpid()
+        local = True
+    elif pid == os.getpid():
+        local = True
+    else:
+        local = False
+
+    if stat_result is None:
+        if local:
+            stat_result = os.fstat(fd)
+        else:
+            stat_result = stat_pid_fd(pid, fd)
+
+    if local:
+        return LocalFileDescriptor(fd, stat_result, pid)
+    else:
+        return RemoteFileDescriptor(fd, stat_result, pid)
 
 
 if __name__ == '__main__':
