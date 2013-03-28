@@ -93,3 +93,5 @@ if __name__ == '__main__':
             except OSError as e:
                 if e.errno == errno.EBADF:
                     print "%d: EBADF" % fd
+                else:
+                    raise
