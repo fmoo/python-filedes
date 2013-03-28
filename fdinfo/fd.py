@@ -1,5 +1,6 @@
 import stat
 import os
+import fcntl
 
 import _fdinfo
 get_open_fds = _fdinfo.get_open_fds
@@ -70,6 +71,12 @@ class _FileDescriptor(object):
 class LocalFileDescriptor(_FileDescriptor):
     """A file descriptor belonging to the current process"""
     LOCAL = "local"
+
+    def ioctl(self, *args):
+        return fcntl.ioctl(self.fd, *args)
+
+    def fcntl(self, *args):
+        return fcntl.fcntl(self.fd, *args)
 
     def _get_stat(self):
         return os.fstat(self.fd)
