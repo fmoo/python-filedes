@@ -27,19 +27,32 @@ _TYPE_LOOKUP = {
 
 class _FileDescriptor(object):
     """Base class for local and remote file descriptors"""
-    def __init__(self, fd, stat_result, pid):
+    def __init__(self, fd, pid=None):
         self.fd = fd
-        self.pid = pid
-        self._stat_result = stat_result
+        self._pid = pid
+        self._stat_result = None
+
+    @property
+    def stat(self):
+        if self._stat_result is None:
+            self._stat_result = self._get_stat()
+        return self._stat_result
+
+    @property
+    def pid(self):
+        if self._pid is None:
+            self._pid = self._get_pid()
+        return self._pid
 
     @property
     def mode(self):
-        return self._stat_result.st_mode
+        return self.stat.st_mode
     
     @property
     def typestr(self):
-        return _TYPE_LOOKUP.get(stat.S_IFMT(self.mode),
-                                "unknown (0%o)" % stat.S_IFMT(self.mode))
+        return _TYPE_LOOKUP.get(
+            stat.S_IFMT(self.mode),
+            "unknown (0%o)" % stat.S_IFMT(self.mode))
 
     def __int__(self):
         return self.fd
@@ -47,36 +60,41 @@ class _FileDescriptor(object):
     def __repr__(self):
         return "<%s %s file #%d>" % (self.LOCAL, self.typestr, self.fd)
 
+    def _get_stat(self):
+        raise NotImplementedError()
+
+    def _get_pid(self):
+        raise NotImplementedError()
+
 
 class LocalFileDescriptor(_FileDescriptor):
     """A file descriptor belonging to the current process"""
     LOCAL = "local"
+
+    def _get_stat(self):
+        return os.fstat(self.fd)
+
+    def _get_pid(self):
+        return os.getpid()
 
 
 class RemoteFileDescriptor(_FileDescriptor):
     """A file descriptor belonging to another process"""
     LOCAL = "remote"
 
+    def _get_pid(self):
+        assert self._pid is not None
+        return self._pid
 
-def FD(fd, stat_result=None, pid=None):
-    if pid is None:
-        pid = os.getpid()
-        local = True
-    elif pid == os.getpid():
-        local = True
+    def _get_stat(self):
+        return stat_pid_fd(self.pid, self.fd)
+
+
+def FD(fd, pid=None):
+    if pid is None or pid == os.getpid():
+        return LocalFileDescriptor(fd, pid=pid)
     else:
-        local = False
-
-    if stat_result is None:
-        if local:
-            stat_result = os.fstat(fd)
-        else:
-            stat_result = stat_pid_fd(pid, fd)
-
-    if local:
-        return LocalFileDescriptor(fd, stat_result, pid)
-    else:
-        return RemoteFileDescriptor(fd, stat_result, pid)
+        return RemoteFileDescriptor(fd, pid)
 
 
 if __name__ == '__main__':
