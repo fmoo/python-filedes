@@ -4,9 +4,12 @@ import os
 import _fdinfo
 get_open_fds = _fdinfo.get_open_fds
 
-def stat_pid_fd(pid, fd):
-    # TODO: Implement for darwin
-    return os.stat("/proc/%d/fd/%d" % (pid, fd))
+if hasattr(_fdinfo, "stat_pid_fd"):
+    stat_pid_fd = _fdinfo.stat_pid_fd
+else:
+    def stat_pid_fd(pid, fd):
+        # TODO: Implement for darwin
+        return os.stat("/proc/%d/fd/%d" % (pid, fd))
 
 
 _TYPE_LOOKUP = {

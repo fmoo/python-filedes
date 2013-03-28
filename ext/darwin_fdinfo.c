@@ -61,9 +61,43 @@ cleanup_error:
 }
 
 
+static PyObject *
+fdinfo_stat_pid_fd(PyObject *self, PyObject *args)
+{
+    int pid, fd;
+
+    if (!PyArg_ParseTuple(args, "ii", &pid, &fd))
+        return NULL;
+
+    struct vnode_fdinfo vnodeinfo;
+    int bufferUsed = proc_pidfdinfo(pid, fd, PROC_PIDFDVNODEINFO, 
+                                    &vnodeinfo, PROC_PIDFDVNODEINFO_SIZE);
+    if (bufferUsed != PROC_PIDFDVNODEINFO_SIZE) {
+      return NULL;
+    }
+
+    /**
+     * TODO: Instead of just returning mode, take this tuple and
+     * dump it into posix.stat_result
+     *
+     * st_mode=33188, st_ino=9065647, st_dev=234881028L, st_nlink=1, st_uid=1717611107, st_gid=1876110778, st_size=73728, st_atime=1364460851, st_mtime=1364460851, st_ctime=1364460851
+     */
+    PyObject *mode = Py_BuildValue("i", vnodeinfo.pvi.vi_stat.vst_mode);
+
+    if (!mode) {
+        return NULL;
+    }
+
+    return mode;
+}
+
+
 static PyMethodDef FDInfoMethods[] = {
-    {"get_open_fds",  fdinfo_get_open_fds, METH_VARARGS,
+    {"get_open_fds", fdinfo_get_open_fds, METH_VARARGS,
       "Returns the open FDs for the given ppid."
+    },
+    {"stat_pid_fd", fdinfo_stat_pid_fd, METH_VARARGS,
+      "Returns a stat struct for the given PID and FD."
     },
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
