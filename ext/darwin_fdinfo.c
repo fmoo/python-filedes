@@ -79,13 +79,6 @@ fdinfo_stat_pid_fd(PyObject *self, PyObject *args)
       return NULL;
     }
 
-    /**
-     * TODO: Instead of just returning mode, take this tuple and
-     * dump it into posix.stat_result
-     *
-     * st_mode=33188, st_ino=9065647, st_dev=234881028L, st_nlink=1, st_uid=1717611107, st_gid=1876110778, st_size=73728, st_atime=1364460851, st_mtime=1364460851, st_ctime=1364460851
-     */
-
     PyObject *start_args = Py_BuildValue("((iiiiiillll))",
         vnodeinfo.pvi.vi_stat.vst_mode,
         vnodeinfo.pvi.vi_stat.vst_ino,
@@ -98,12 +91,12 @@ fdinfo_stat_pid_fd(PyObject *self, PyObject *args)
         vnodeinfo.pvi.vi_stat.vst_mtime,
         vnodeinfo.pvi.vi_stat.vst_ctime
     );
-    if (start_args == NULL) {
+    if (!start_args) {
       return NULL;
     }
 
     PyObject *result = PyObject_CallObject(stat_result, start_args);
-    if (start_args == NULL) {
+    if (!result) {
       Py_XDECREF(start_args);
       return NULL;
     }
