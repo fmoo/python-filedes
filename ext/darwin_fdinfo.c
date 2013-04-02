@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+static PyObject *posix;
+static PyObject *stat_result;
+
 static PyObject *
 fdinfo_get_open_fds(PyObject *self, PyObject *args)
 {
@@ -82,13 +85,31 @@ fdinfo_stat_pid_fd(PyObject *self, PyObject *args)
      *
      * st_mode=33188, st_ino=9065647, st_dev=234881028L, st_nlink=1, st_uid=1717611107, st_gid=1876110778, st_size=73728, st_atime=1364460851, st_mtime=1364460851, st_ctime=1364460851
      */
-    PyObject *mode = Py_BuildValue("i", vnodeinfo.pvi.vi_stat.vst_mode);
 
-    if (!mode) {
-        return NULL;
+    PyObject *start_args = Py_BuildValue("((iiiiiillll))",
+        vnodeinfo.pvi.vi_stat.vst_mode,
+        vnodeinfo.pvi.vi_stat.vst_ino,
+        vnodeinfo.pvi.vi_stat.vst_dev,
+        vnodeinfo.pvi.vi_stat.vst_nlink,
+        vnodeinfo.pvi.vi_stat.vst_uid,
+        vnodeinfo.pvi.vi_stat.vst_gid,
+        vnodeinfo.pvi.vi_stat.vst_size,
+        vnodeinfo.pvi.vi_stat.vst_atime,
+        vnodeinfo.pvi.vi_stat.vst_mtime,
+        vnodeinfo.pvi.vi_stat.vst_ctime
+    );
+    if (start_args == NULL) {
+      return NULL;
     }
 
-    return mode;
+    PyObject *result = PyObject_CallObject(stat_result, start_args);
+    if (start_args == NULL) {
+      Py_XDECREF(start_args);
+      return NULL;
+    }
+
+    Py_XDECREF(start_args);
+    return result;
 }
 
 
@@ -110,5 +131,13 @@ init_fdinfo(void)
 
     m = Py_InitModule("_fdinfo", FDInfoMethods);
     if (m == NULL)
+        return;
+
+    posix = PyImport_ImportModule("posix");
+    if (posix == NULL)
+        return;
+
+    stat_result = PyObject_GetAttrString(posix, "stat_result");
+    if (stat_result == NULL)
         return;
 }
