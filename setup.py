@@ -1,9 +1,11 @@
 from setuptools import setup, Extension
 import platform
 
+LIBANCILLIARY = ['ext/libancilliary/' + p for p in ['fd_send.c', 'fd_recv.c']]
+
 PLATFORM_EXTENSIONS = {
-    'Darwin': [Extension('_filedes', ['ext/darwin_filedes.c'])],
-    'Linux': [Extension('_filedes', ['ext/linux_filedes.c'])],
+    'Darwin': [Extension('_filedes', ['ext/darwin_filedes.c'] + LIBANCILLIARY)],
+    'Linux': [Extension('_filedes', ['ext/linux_filedes.c'] + LIBANCILLIARY)],
 }
 
 if __name__ == '__main__':
