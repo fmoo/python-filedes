@@ -2,21 +2,21 @@ from setuptools import setup, Extension
 import platform
 
 PLATFORM_EXTENSIONS = {
-    'Darwin': [Extension('_fdinfo', ['ext/darwin_fdinfo.c'])],
-    'Linux': [Extension('_fdinfo', ['ext/linux_fdinfo.c'])],
+    'Darwin': [Extension('_filedes', ['ext/darwin_filedes.c'])],
+    'Linux': [Extension('_filedes', ['ext/linux_filedes.c'])],
 }
 
 if __name__ == '__main__':
     kwargs = dict(
-        name='fdinfo',
+        name='filedes',
         version='0.1',
         description="Work with file descriptors in a more human way",
-        packages=['fdinfo'],
+        packages=['filedes'],
         author='Peter Ruibal',
         author_email='ruibalp@gmail.com',
         license='ISC',
-        keywords='file-descriptor',
-        url='http://github.com/fmoo/python-fdinfo',
+        keywords='file-descriptor fd filedes',
+        url='http://github.com/fmoo/python-filedes',
 
         classifiers=[
             "Development Status :: 3 - Alpha",
