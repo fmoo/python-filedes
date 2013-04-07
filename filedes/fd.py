@@ -2,11 +2,11 @@ import stat
 import os
 import fcntl
 
-import _fdinfo
-get_open_fds = _fdinfo.get_open_fds
+import _filedes
+get_open_fds = _filedes.get_open_fds
 
-if hasattr(_fdinfo, "stat_pid_fd"):
-    stat_pid_fd = _fdinfo.stat_pid_fd
+if hasattr(_filedes, "stat_pid_fd"):
+    stat_pid_fd = _filedes.stat_pid_fd
 else:
     def stat_pid_fd(pid, fd):
         return os.stat("/proc/%d/fd/%d" % (pid, fd))

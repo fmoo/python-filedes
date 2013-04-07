@@ -5,7 +5,7 @@
 
 
 static PyObject *
-fdinfo_get_open_fds(PyObject *self, PyObject *args)
+filedes_get_open_fds(PyObject *self, PyObject *args)
 {
     PyObject *result = NULL;
     int pid = -1;
@@ -90,7 +90,7 @@ cleanup_error:
 
 
 static PyMethodDef FDInfoMethods[] = {
-    {"get_open_fds",  fdinfo_get_open_fds, METH_VARARGS,
+    {"get_open_fds",  filedes_get_open_fds, METH_VARARGS,
       "Returns the open FDs for the given ppid."
     },
     {NULL, NULL, 0, NULL}        /* Sentinel */
@@ -98,11 +98,11 @@ static PyMethodDef FDInfoMethods[] = {
 
 
 PyMODINIT_FUNC
-init_fdinfo(void)
+init_filedes(void)
 {
     PyObject *m;
 
-    m = Py_InitModule("_fdinfo", FDInfoMethods);
+    m = Py_InitModule("_filedes", FDInfoMethods);
     if (m == NULL)
         return;
 }
