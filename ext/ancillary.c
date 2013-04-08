@@ -48,9 +48,10 @@ PyObject *ancillary_send_fds(PyObject *self, PyObject *args) {
     }
 
     int length = PyObject_Size(py_fds);
+    int i;
     int *fds = malloc(sizeof(int) * length);
 
-    for (int i = 0; i < length; i++) {
+    for (i = 0; i < length; i++) {
         PyObject *py_fd = PySequence_GetItem(py_fds, i);
         if (!PyInt_Check(py_fd)) {
             Py_DECREF(py_fd);
@@ -93,8 +94,9 @@ PyObject *ancillary_recv_fds(PyObject *self, PyObject *args) {
     }
 
     PyObject *result = PyList_New(num_fds);
+    int i;
 
-    for (int i = 0; i < num_fds; i++) {
+    for (i = 0; i < num_fds; i++) {
         PyList_SetItem(result, i, PyInt_FromLong(fds[i]));
     }
 
