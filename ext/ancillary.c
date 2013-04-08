@@ -77,7 +77,7 @@ send_fds_cleanup:
 
 static
 PyObject *ancillary_recv_fds(PyObject *self, PyObject *args) {
-    int sockfd, num_fds, i;
+    int sockfd, num_fds, n_recv_fds, i;
     int *fds;
     if (!PyArg_ParseTuple(args, "ii", &sockfd, &num_fds)) {
         // TODO: Set Exception
@@ -86,8 +86,13 @@ PyObject *ancillary_recv_fds(PyObject *self, PyObject *args) {
 
     fds = malloc(sizeof(int) * num_fds);
 
-    if (ancil_recv_fds(sockfd, fds, num_fds) != 0) {
+    n_recv_fds = ancil_recv_fds(sockfd, fds, num_fds);
+    if (n_recv_fds == -1) {
         PyErr_SetFromErrno(PyExc_OSError);
+        free(fds);
+        return NULL;
+    } else if (n_recv_fds != num_fds) {
+        // TODO: Set a meaningful exception
         free(fds);
         return NULL;
     }
