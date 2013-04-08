@@ -1,4 +1,4 @@
-#include <python2.7/Python.h>
+#include <Python.h>
 
 #include <sys/types.h>
 #include <dirent.h>
