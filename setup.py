@@ -1,11 +1,12 @@
 from setuptools import setup, Extension
 import platform
 
-LIBANCILLIARY = ['ext/libancillary/' + p for p in ['fd_send.c', 'fd_recv.c']]
+LIBANCILLARY = ['ext/libancillary/' + p for p in ['fd_send.c', 'fd_recv.c']]
+ANCILLARY = Extension('_ancillary', ['ext/ancillary.c'] + LIBANCILLARY)
 
 PLATFORM_EXTENSIONS = {
-    'Darwin': [Extension('_filedes', ['ext/darwin_filedes.c'] + LIBANCILLIARY)],
-    'Linux': [Extension('_filedes', ['ext/linux_filedes.c'] + LIBANCILLIARY)],
+    'Darwin': [Extension('_filedes', ['ext/darwin_filedes.c'])] + [ANCILLARY],
+    'Linux': [Extension('_filedes', ['ext/linux_filedes.c'])] + [ANCILLARY],
 }
 
 if __name__ == '__main__':
