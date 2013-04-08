@@ -39,7 +39,7 @@ PyObject *ancillary_recv_fd(PyObject *self, PyObject *args) {
 static
 PyObject *ancillary_send_fds(PyObject *self, PyObject *args) {
     // TODO: Make sure n_fds < ANCIL_MAX_N_FDS
-    int sockfd;
+    int sockfd, i;
     PyObject *py_fds;
 
     if (!PyArg_ParseTuple(args, "iO!", &sockfd, &PyList_Type, &py_fds)) {
@@ -48,7 +48,6 @@ PyObject *ancillary_send_fds(PyObject *self, PyObject *args) {
     }
 
     int length = PyObject_Size(py_fds);
-    int i;
     int *fds = malloc(sizeof(int) * length);
 
     for (i = 0; i < length; i++) {
@@ -78,7 +77,7 @@ send_fds_cleanup:
 
 static
 PyObject *ancillary_recv_fds(PyObject *self, PyObject *args) {
-    int sockfd, num_fds;
+    int sockfd, num_fds, i;
     int *fds;
     if (!PyArg_ParseTuple(args, "ii", &sockfd, &num_fds)) {
         // TODO: Set Exception
@@ -94,7 +93,6 @@ PyObject *ancillary_recv_fds(PyObject *self, PyObject *args) {
     }
 
     PyObject *result = PyList_New(num_fds);
-    int i;
 
     for (i = 0; i < num_fds; i++) {
         PyList_SetItem(result, i, PyInt_FromLong(fds[i]));
