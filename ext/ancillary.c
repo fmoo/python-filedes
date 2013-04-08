@@ -112,11 +112,11 @@ static PyMethodDef AncillaryMethods[] = {
       "recv_fd(sockfd) -> integer\n\n"
       "Receive an fd from a `sockfd` (potentially from another process)"
     },
-    {"send_fds", ancillary_send_fd, METH_VARARGS,
+    {"send_fds", ancillary_send_fds, METH_VARARGS,
       "send_fds(sockfd, fds)\n\n"
       "Send multiple `fds` over `sockfd` (to potentially other processes)"
     },
-    {"recv_fds", ancillary_recv_fd, METH_VARARGS,
+    {"recv_fds", ancillary_recv_fds, METH_VARARGS,
       "recv_fds(sockfd, n_fds) -> list(integer)\n\n"
       "Receive multiple fds from a `sockfd` (potentially from another process)"
     },
