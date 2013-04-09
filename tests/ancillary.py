@@ -51,6 +51,7 @@ class TestAncillary(BaseFDTestCase):
         msg, pid = msg.split(":")
         self.assertEquals(msg, "OK")
         self.assertEquals(int(pid), p1.pid)
+        self.assertNotEquals(int(pid), os.getpid())
 
         os.close(r)
         os.close(w)
