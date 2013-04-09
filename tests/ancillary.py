@@ -56,5 +56,10 @@ class TestAncillary(BaseFDTestCase):
         os.close(r)
         os.close(w)
 
+        p1.join()
+        self.assertEquals(p1.exitcode, 0)
+
+        t.join()
+
 if __name__ == '__main__':
     unittest2.main()
