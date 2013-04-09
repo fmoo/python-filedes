@@ -6,6 +6,9 @@ from ..fd import FD, get_open_fds
 
 
 class BaseFDTestCase(unittest2.TestCase):
+    def getNewFDs(self):
+        return [FD(fd) for fd in get_open_fds() if fd not in self._start_fds]
+
     def assertNotNone(self, o, msg=''):
         self.assertTrue(o is not None, msg)
 
