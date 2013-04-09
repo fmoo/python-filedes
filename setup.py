@@ -1,4 +1,4 @@
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 import platform
 
 LIBANCILLARY = ['ext/libancillary/' + p for p in ['fd_send.c', 'fd_recv.c']]
@@ -14,7 +14,7 @@ if __name__ == '__main__':
         name='filedes',
         version='0.1',
         description="Work with file descriptors in a more human way",
-        packages=['filedes'],
+        packages=find_packages(exclude=['tests', 'tests.*']),
         author='Peter Ruibal',
         author_email='ruibalp@gmail.com',
         license='ISC',
@@ -25,6 +25,10 @@ if __name__ == '__main__':
             "Development Status :: 3 - Alpha",
             "License :: OSI Approved :: ISC License (ISCL)",
         ],
+
+        install_requires=["unittest2"],
+        setup_requires=['unittest2'],
+        test_suite="tests",
     )
 
     # Add extension modules (as necessary)

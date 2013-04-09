@@ -57,6 +57,9 @@ class _FileDescriptor(object):
     def __int__(self):
         return self.fd
 
+    def __cmp__(self, b):
+        return cmp(self.fd, b.fd)
+
     def __repr__(self):
         return "<%s %s file #%d>" % (self.LOCAL, self.typestr, self.fd)
 
