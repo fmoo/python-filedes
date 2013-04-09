@@ -58,7 +58,16 @@ class _FileDescriptor(object):
         return self.fd
 
     def __cmp__(self, b):
-        return cmp(self.fd, b.fd)
+        if isinstance(b, _FileDescriptor):
+            return cmp(self.fd, b.fd)
+        elif isinstance(b, (int, long)):
+            return cmp(self.fd, b)
+        elif hasattr(b, 'fileno') and callable(b.fileno):
+            return cmp(self.fd, b.fileno())
+        elif self is b:
+            return 0
+        else:
+            return cmp(hash(self), hash(b))
 
     def __repr__(self):
         return "<%s %s file #%d>" % (self.LOCAL, self.typestr, self.fd)
