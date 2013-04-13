@@ -3,6 +3,10 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+extern void init_posix(void);
+extern PyObject *fgetsockopt(PyObject *self, PyObject *args);
+extern PyObject *fsetsockopt(PyObject *self, PyObject *args);
+
 
 static PyObject *
 filedes_get_open_fds(PyObject *self, PyObject *args)
@@ -93,6 +97,17 @@ static PyMethodDef FDInfoMethods[] = {
     {"get_open_fds",  filedes_get_open_fds, METH_VARARGS,
       "Returns the open FDs for the given ppid."
     },
+    {"getsockopt", fgetsockopt, METH_VARARGS,
+     "getsockopt(fd, level, option[, buffersize]) -> value\n\n"
+     "Get a socket option.  See the Unix manual for level and option.\n"
+     "If a nonzero buffersize argument is given, the return value is a\n"
+     "string of that length; otherwise it is an integer."
+    },
+    {"setsockopt", fsetsockopt, METH_VARARGS,
+     "setsockopt(fd, level, option, value)\n\n"
+     "Set a socket option.  See the Unix manual for level and option.\n"
+     "The value argument can either be an integer or a string."
+    },
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -105,4 +120,6 @@ init_filedes(void)
     m = Py_InitModule("_filedes", FDInfoMethods);
     if (m == NULL)
         return;
+
+    init_posix();
 }

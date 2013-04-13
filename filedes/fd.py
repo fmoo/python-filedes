@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import stat
 import os
 import fcntl
+import socket
 
 import _filedes
 get_open_fds = _filedes.get_open_fds
@@ -10,6 +13,15 @@ if hasattr(_filedes, "stat_pid_fd"):
 else:
     def stat_pid_fd(pid, fd):
         return os.stat("/proc/%d/fd/%d" % (pid, fd))
+
+
+def get_fileno(fd_or_obj):
+    try:
+        return int(fd_or_obj)
+    except:
+        if hasattr(fd_or_obj, 'fileno') and callable(fd_or_obj.fileno):
+            return fd_or_obj.fileno()
+    raise TypeError("Unable to get fd from %s" % fd_or_obj)
 
 
 _TYPE_LOOKUP = {
@@ -47,7 +59,7 @@ class _FileDescriptor(object):
     @property
     def mode(self):
         return self.stat.st_mode
-    
+
     @property
     def typestr(self):
         return _TYPE_LOOKUP.get(
@@ -58,16 +70,13 @@ class _FileDescriptor(object):
         return self.fd
 
     def __cmp__(self, b):
-        if isinstance(b, _FileDescriptor):
-            return cmp(self.fd, b.fd)
-        elif isinstance(b, (int, long)):
-            return cmp(self.fd, b)
-        elif hasattr(b, 'fileno') and callable(b.fileno):
-            return cmp(self.fd, b.fileno())
-        elif self is b:
-            return 0
-        else:
-            return cmp(hash(self), hash(b))
+        try:
+            return cmp(self.fd, get_fileno(b))
+        except:
+            if self is b:
+                return 0
+            else:
+                return cmp(hash(self), hash(b))
 
     def __repr__(self):
         return "<%s %s file #%d>" % (self.LOCAL, self.typestr, self.fd)
@@ -82,6 +91,7 @@ class _FileDescriptor(object):
 class LocalFileDescriptor(_FileDescriptor):
     """A file descriptor belonging to the current process"""
     LOCAL = "local"
+    _socket = None
 
     def ioctl(self, *args):
         return fcntl.ioctl(self.fd, *args)
@@ -94,6 +104,29 @@ class LocalFileDescriptor(_FileDescriptor):
 
     def _get_pid(self):
         return os.getpid()
+
+    @property
+    def socket(self):
+        if self._socket is None:
+            self._socket = SocketHelper(self)
+        return self._socket
+
+
+class SocketHelper(object):
+    def __init__(self, fd):
+        self.fd = int(fd)
+
+    def setopt(self, level, optname, value):
+        return _filedes.setsockopt(self.fd, level, optname, value)
+
+    def getopt(self, level, optname, buflen=0):
+        return _filedes.getsockopt(self.fd, level, optname, buflen)
+
+    def set_reuse(self, value=True):
+        return self.setopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, value)
+
+    def get_reuse(self):
+        return self.getopt(socket.SOL_SOCKET, socket.SO_REUSEADDR)
 
 
 class RemoteFileDescriptor(_FileDescriptor):
@@ -109,6 +142,7 @@ class RemoteFileDescriptor(_FileDescriptor):
 
 
 def FD(fd, pid=None):
+    fd = get_fileno(fd)
     if pid is None or pid == os.getpid():
         return LocalFileDescriptor(fd, pid=pid)
     else:

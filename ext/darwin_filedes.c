@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+
+extern void init_posix(void);
+extern PyObject *fgetsockopt(PyObject *self, PyObject *args);
+extern PyObject *fsetsockopt(PyObject *self, PyObject *args);
+
 static PyObject *posix;
 static PyObject *stat_result;
 
@@ -113,6 +118,17 @@ static PyMethodDef FDInfoMethods[] = {
     {"stat_pid_fd", filedes_stat_pid_fd, METH_VARARGS,
       "Returns a stat struct for the given PID and FD."
     },
+    {"getsockopt", fgetsockopt, METH_VARARGS,
+     "getsockopt(fd, level, option[, buffersize]) -> value\n\n"
+     "Get a socket option.  See the Unix manual for level and option.\n"
+     "If a nonzero buffersize argument is given, the return value is a\n"
+     "string of that length; otherwise it is an integer."
+    },
+    {"setsockopt", fsetsockopt, METH_VARARGS,
+     "setsockopt(fd, level, option, value)\n\n"
+     "Set a socket option.  See the Unix manual for level and option.\n"
+     "The value argument can either be an integer or a string."
+    },
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -133,4 +149,6 @@ init_filedes(void)
     stat_result = PyObject_GetAttrString(posix, "stat_result");
     if (stat_result == NULL)
         return;
+
+    init_posix();
 }

@@ -5,8 +5,10 @@ LIBANCILLARY = ['ext/libancillary/' + p for p in ['fd_send.c', 'fd_recv.c']]
 ANCILLARY = Extension('_ancillary', ['ext/ancillary.c'] + LIBANCILLARY)
 
 PLATFORM_EXTENSIONS = {
-    'Darwin': [Extension('_filedes', ['ext/darwin_filedes.c'])] + [ANCILLARY],
-    'Linux': [Extension('_filedes', ['ext/linux_filedes.c'])] + [ANCILLARY],
+    'Darwin': [Extension('_filedes', ['ext/posix_filedes.c',
+                                      'ext/darwin_filedes.c'])] + [ANCILLARY],
+    'Linux': [Extension('_filedes', ['ext/posix_filedes.c',
+                                     'ext/linux_filedes.c'])] + [ANCILLARY],
 }
 
 if __name__ == '__main__':
