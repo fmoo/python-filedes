@@ -113,12 +113,6 @@ class LocalFileDescriptor(_FileDescriptor):
         """Call a fcntl on this fd"""
         return fcntl.fcntl(self.fd, *args)
 
-    def _get_stat(self):
-        return os.fstat(self.fd)
-
-    def _get_pid(self):
-        return os.getpid()
-
     @property
     def socket(self):
         """Return a socket helper for the underlying fd"""
@@ -127,6 +121,12 @@ class LocalFileDescriptor(_FileDescriptor):
                 raise TypeError("%s is not a socket" % self.typestr)
             self._socket = SocketHelper(self)
         return self._socket
+
+    def _get_stat(self):
+        return os.fstat(self.fd)
+
+    def _get_pid(self):
+        return os.getpid()
 
 
 class SocketHelper(object):
