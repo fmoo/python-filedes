@@ -61,9 +61,12 @@ class _FileDescriptor(object):
         return self.stat.st_mode
 
     @property
+    def typecode(self):
+        return stat.S_IFMT(self.mode)
+
+    @property
     def typestr(self):
-        return _TYPE_LOOKUP.get(
-            stat.S_IFMT(self.mode),
+        return _TYPE_LOOKUP.get(self.typecode,
             "unknown (0%o)" % stat.S_IFMT(self.mode))
 
     def __int__(self):
