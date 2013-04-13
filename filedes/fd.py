@@ -40,9 +40,13 @@ _TYPE_LOOKUP = {
 class _FileDescriptor(object):
     """Base class for local and remote file descriptors"""
     def __init__(self, fd, pid=None):
-        self.fd = fd
+        self._fd = fd
         self._pid = pid
         self._stat_result = None
+
+    @property
+    def fd(self):
+        return self._fd
 
     @property
     def stat(self):
