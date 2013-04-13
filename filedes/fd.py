@@ -147,7 +147,7 @@ class SocketHelper(object):
 
     def get_reuse(self):
         """Get whether SO_REUSE is set on this socket"""
-        return self.getopt(socket.SOL_SOCKET, socket.SO_REUSEADDR)
+        return bool(self.getopt(socket.SOL_SOCKET, socket.SO_REUSEADDR))
 
 
 class RemoteFileDescriptor(_FileDescriptor):
