@@ -111,6 +111,8 @@ class LocalFileDescriptor(_FileDescriptor):
     @property
     def socket(self):
         if self._socket is None:
+            if self.typecode != stat.S_IFSOCK:
+                raise TypeError("%s is not a socket" % self.typestr)
             self._socket = SocketHelper(self)
         return self._socket
 
