@@ -16,6 +16,7 @@ else:
 
 
 def get_fileno(fd_or_obj):
+    """Returns the file descriptor number for the given `fd_or_obj`"""
     try:
         return int(fd_or_obj)
     except:
@@ -50,6 +51,7 @@ class _FileDescriptor(object):
 
     @property
     def stat(self):
+        # TODO: Maybe we shouldn't cache this?
         if self._stat_result is None:
             self._stat_result = self._get_stat()
         return self._stat_result
@@ -62,14 +64,17 @@ class _FileDescriptor(object):
 
     @property
     def mode(self):
+        """Returns the mode bits from the stat results for this FD"""
         return self.stat.st_mode
 
     @property
     def typecode(self):
+        """Returns the type code bits from the mode for this FD"""
         return stat.S_IFMT(self.mode)
 
     @property
     def typestr(self):
+        """Returns a string corresponding to the type of this FD"""
         return _TYPE_LOOKUP.get(self.typecode,
             "unknown (0%o)" % stat.S_IFMT(self.mode))
 
@@ -101,9 +106,11 @@ class LocalFileDescriptor(_FileDescriptor):
     _socket = None
 
     def ioctl(self, *args):
+        """Call an ioctl on this fd"""
         return fcntl.ioctl(self.fd, *args)
 
     def fcntl(self, *args):
+        """Call a fcntl on this fd"""
         return fcntl.fcntl(self.fd, *args)
 
     def _get_stat(self):
@@ -114,6 +121,7 @@ class LocalFileDescriptor(_FileDescriptor):
 
     @property
     def socket(self):
+        """Return a socket helper for the underlying fd"""
         if self._socket is None:
             if self.typecode != stat.S_IFSOCK:
                 raise TypeError("%s is not a socket" % self.typestr)
@@ -126,15 +134,19 @@ class SocketHelper(object):
         self.fd = int(fd)
 
     def setopt(self, level, optname, value):
+        """Set the `optname` sockopt at `level` to `value`"""
         return _filedes.setsockopt(self.fd, level, optname, value)
 
     def getopt(self, level, optname, buflen=0):
+        """Returns the `name` sockopt at `level` from this socket"""
         return _filedes.getsockopt(self.fd, level, optname, buflen)
 
     def set_reuse(self, value=True):
+        """Enable SO_REUSE on this socket"""
         return self.setopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, value)
 
     def get_reuse(self):
+        """Get whether SO_REUSE is set on this socket"""
         return self.getopt(socket.SOL_SOCKET, socket.SO_REUSEADDR)
 
 
@@ -151,6 +163,11 @@ class RemoteFileDescriptor(_FileDescriptor):
 
 
 def FD(fd, pid=None):
+    """Returns the FileDescriptor object for the given integer `fd`
+
+    `pid` may also be provided if you want to get extended information about
+    fds belonging to other processes.
+    """
     fd = get_fileno(fd)
     if pid is None or pid == os.getpid():
         return LocalFileDescriptor(fd, pid=pid)
