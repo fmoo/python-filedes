@@ -16,9 +16,12 @@ class TestFDIO(BaseFDTestCase):
         r, w = os.pipe()
         fw = FD(w)
         fw.close()
-        with self.assertRaises(OSError):
-            fw.write("oops")
-        FD(r).close()
+        try:
+            with self.assertRaises(OSError) as ar:
+                fw.write("oops")
+            self.assertEquals(ar.exception.errno, errno.EBADF)
+        finally:
+            FD(r).close()
 
     def testNonblocking(self):
         r, w = os.pipe()
