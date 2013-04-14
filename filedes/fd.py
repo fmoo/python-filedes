@@ -134,6 +134,16 @@ class LocalFileDescriptor(_FileDescriptor):
             self._socket = SocketHelper(self)
         return self._socket
 
+    def is_cloexec(self):
+        """Returns whether the close-on-execute bit is set on this FD"""
+        return self.get_fd_flag(fcntl.FD_CLOEXEC)
+
+    def set_cloexec(self, cloexec=True):
+        """Sets the close-on-execute bit on this FD"""
+        return self.set_fd_flag(fcntl.FD_CLOEXEC, cloexec)
+
+    cloexec = property(is_cloexec, set_cloexec)
+
     def is_nonblocking(self):
         """Returns whether the stream for this FD is in nonblocking mode"""
         return self.get_status_flag(os.O_NONBLOCK)
