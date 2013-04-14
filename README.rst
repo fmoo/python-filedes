@@ -10,3 +10,11 @@ Key features
 * Set various fd flags in a more native way, such as `fd.set_cloexec()` or `fd.set_nonblocking()`
 * Socket helpers let you set socket options in a more native way, such as `fd.socket.set_reuse()`
 * A Popen() subclass with a more intelligent `close_fds` for systems with a high fs.file-max set
+
+Platforms
+=========
+fdinfo is primarily developed on linux, but it doesn't work just there.
+It has been tested on the following platforms:
+
+- linux
+- OSX
