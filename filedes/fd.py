@@ -134,6 +134,45 @@ class LocalFileDescriptor(_FileDescriptor):
             self._socket = SocketHelper(self)
         return self._socket
 
+    def is_nonblocking(self):
+        """Returns whether the stream for this FD is in nonblocking mode"""
+        return self.get_status_flag(os.O_NONBLOCK)
+
+    def set_nonblocking(self, nonblocking=True):
+        """Sets whether the stream for this FD is in nonblocking mode"""
+        return self.set_status_flag(os.O_NONBLOCK, nonblocking)
+
+    nonblocking = property(is_nonblocking, set_nonblocking)
+
+    def get_fd_flag(self, flag):
+        """Returns the value of the fd `flag` for this FD"""
+        return self._get_flag(flag, c_get=fcntl.F_GETFL)
+
+    def set_fd_flag(self, flag, value):
+        """Sets an fd `flag` to the given `value`"""
+        return self._set_flag(flag, value, c_get=fcntl.F_GETFL, c_set=fcntl.F_SETFL)
+
+    def get_status_flag(self, flag):
+        """Returns the value of the status `flag` for this FD"""
+        return self._get_flag(flag, c_get=fcntl.F_GETFL)
+
+    def set_status_flag(self, flag, value):
+        """Sets a status `flag` to the given `value`"""
+        return self._set_flag(flag, value, c_get=fcntl.F_GETFL,
+                             c_set=fcntl.F_SETFL)
+
+    def _get_flag(self, flag, c_get):
+        flags = self.fcntl(fd, c_get)
+        return bool(flags & flag == flag)
+
+    def _set_flag(self, flag, value, c_get, c_set):
+        flags = self.fcntl(c_get)
+        if value:
+            flags |= flag
+        else:
+            flags &= ~flag
+        return self.fcntl(c_set, flags)
+
     def _get_stat(self):
         return os.fstat(self.fd)
 

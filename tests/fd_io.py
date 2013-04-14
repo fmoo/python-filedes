@@ -1,6 +1,7 @@
 from filedes.test.base import BaseFDTestCase
 from filedes import FD
 import os
+import errno
 
 
 class TestFDIO(BaseFDTestCase):
@@ -18,3 +19,15 @@ class TestFDIO(BaseFDTestCase):
         with self.assertRaises(OSError):
             fw.write("oops")
         FD(r).close()
+
+    def testNonblocking(self):
+        r, w = os.pipe()
+        fr = FD(r)
+        try:
+            fr.set_nonblocking()
+            with self.assertRaises(OSError) as ar:
+                fr.read(1)
+            self.assertEquals(ar.exception.errno, errno.EAGAIN)
+        finally:
+            fr.close()
+            FD(w).close()
