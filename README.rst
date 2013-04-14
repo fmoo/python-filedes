@@ -7,5 +7,6 @@ Key features
 * Get detailed info about fds in both the local as well as external processes
 * Perform fcntl and io operations directly on descriptor objects
 * Unittest helper class for making sure your tests don't leak fds or threads.
-* TBD: Set various socket and fd flags in a more native way, such as `fd.set_cloexec()` or `fd.set_nonblocking()`
+* Set various fd flags in a more native way, such as `fd.set_cloexec()` or `fd.set_nonblocking()`
 * Socket helpers let you set socket options in a more native way, such as `fd.socket.set_reuse()`
+* A Popen() subclass with a more intelligent `close_fds` for systems with a high fs.file-max set
