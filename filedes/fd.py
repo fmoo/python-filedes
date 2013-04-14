@@ -146,11 +146,11 @@ class LocalFileDescriptor(_FileDescriptor):
 
     def get_fd_flag(self, flag):
         """Returns the value of the fd `flag` for this FD"""
-        return self._get_flag(flag, c_get=fcntl.F_GETFL)
+        return self._get_flag(flag, c_get=fcntl.F_GETFD)
 
     def set_fd_flag(self, flag, value):
         """Sets an fd `flag` to the given `value`"""
-        return self._set_flag(flag, value, c_get=fcntl.F_GETFL, c_set=fcntl.F_SETFL)
+        return self._set_flag(flag, value, c_get=fcntl.F_GETFD, c_set=fcntl.F_SETFD)
 
     def get_status_flag(self, flag):
         """Returns the value of the status `flag` for this FD"""
