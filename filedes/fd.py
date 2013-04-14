@@ -105,6 +105,18 @@ class LocalFileDescriptor(_FileDescriptor):
     LOCAL = "local"
     _socket = None
 
+    def read(self, n):
+        """Read `n` bytes from the underlying fd"""
+        return os.read(self.fd, n)
+
+    def write(self, str):
+        """Read `str` to the underlying fd"""
+        return os.write(self.fd, str)
+
+    def close(self):
+        """Close underlying fd"""
+        return os.close(self.fd)
+
     def ioctl(self, *args):
         """Call an ioctl on this fd"""
         return fcntl.ioctl(self.fd, *args)
