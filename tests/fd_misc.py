@@ -31,7 +31,7 @@ class CloseOnExecuteTests(BaseFDTestCase):
                 # As an added check, make sure the mode flags on the remote
                 # and local process' fds are identical
                 self.assertEquals(FD(r, p.pid).mode, FD(r).mode)
-                
+
                 # Now send some output to the remote process to unblock it
                 p.stdin.write("ok\n")
                 p.stdin.flush()
@@ -56,3 +56,34 @@ class PipeTests(BaseFDTestCase):
         self.assertIsInstance(w, LocalFileDescriptor)
         r.close()
         w.close()
+
+
+class DupTests(BaseFDTestCase):
+    def dupTestCommon(self, r, w, r2):
+        # make sure they're not the same
+        self.assertNotEquals(r, r2)
+        self.assertNotEquals(int(r), int(r2))
+
+        # make sure we can read from the original fd
+        self.assertEquals(w.write("OK"), 2)
+        self.assertEquals(r.read(2), "OK")
+
+        # make sure we can read from the dup'd fd
+        self.assertEquals(w.write("OK"), 2)
+        self.assertEquals(r2.read(2), "OK")
+
+        # now close them
+        r.close()
+        w.close()
+        r2.close()
+
+
+    def testDup(self):
+        r, w = filedes.pipe()
+        r2 = r.dup()
+        self.dupTestCommon(r, w, r2)
+
+    def testDup2(self):
+        r, w = filedes.pipe()
+        r2 = r.dup(63)
+        self.dupTestCommon(r, w, r2)

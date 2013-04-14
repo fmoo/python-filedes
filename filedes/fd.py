@@ -117,6 +117,14 @@ class LocalFileDescriptor(_FileDescriptor):
         """Close underlying fd"""
         return os.close(self.fd)
 
+    def dup(self, newfd=None):
+        """Duplicate the underlying FD (to fd `newfd`, if provided)"""
+        if newfd is not None:
+            os.dup2(self.fd, get_fileno(newfd))
+            return FD(newfd)
+        else:
+            return FD(os.dup(self.fd))
+
     def ioctl(self, *args):
         """Call an ioctl on this fd"""
         return fcntl.ioctl(self.fd, *args)
