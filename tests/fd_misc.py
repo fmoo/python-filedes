@@ -1,7 +1,8 @@
 from filedes.test.base import BaseFDTestCase
-from filedes import FD, get_open_fds
+from filedes import FD, get_open_fds, LocalFileDescriptor
 from subprocess import Popen, PIPE, STDOUT
 import os
+import filedes
 
 
 class CloseOnExecuteTests(BaseFDTestCase):
@@ -46,3 +47,12 @@ class CloseOnExecuteTests(BaseFDTestCase):
         finally:
             FD(r).close()
             FD(w).close()
+
+
+class PipeTests(BaseFDTestCase):
+    def testPipeConstructor(self):
+        r, w = filedes.pipe()
+        self.assertIsInstance(r, LocalFileDescriptor)
+        self.assertIsInstance(w, LocalFileDescriptor)
+        r.close()
+        w.close()

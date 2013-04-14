@@ -236,6 +236,10 @@ def FD(fd, pid=None):
         return RemoteFileDescriptor(fd, pid)
 
 
+def pipe():
+    return (FD(fd) for fd in os.pipe())
+
+
 if __name__ == '__main__':
     import errno
     import argparse
