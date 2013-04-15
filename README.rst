@@ -2,6 +2,56 @@ fdinfo
 ======
 fdinfo is a python library for using file descriptors in a more intuitive way.
 
+Examples
+========
+
+Creating a socket with SO_REUSEADR (or SO_REUSEPORT on BSD):
+
+.. code:: python
+
+  from filedes import FD
+  s = socket.socket()
+  FD(s).socket.set_reuse()
+
+Enabling non-blocking mode on a PIPE
+
+.. code:: python
+
+  import os
+  from filedes import FD
+  r, w = os.pipe()
+  FD(r).set_nonblocking()
+
+Disabling the close on execute bit for a temporary file
+
+.. code:: python
+
+  import tempfile
+  from filedes import FD
+  tf = tempfile.NamedTemporaryFile()
+  FD(tf).set_cloexec(False)
+
+Listing the open FDs and their types of the current PID:
+
+.. code:: python
+
+  from filedes import FD, get_open_fds
+  for fd in get_open_fds():
+      print fd, FD(fd).typestr
+
+Sending a PIPE to another process over a unix socket
+
+.. code:: python
+
+  from filedes import FD
+
+  # For a single FD
+  FD(sock).socket.send_fd(an_fd)
+
+  # Or for multiple FDs
+  FD(sock).socket.send_fds(multiple_fds)
+
+
 Key features
 ============
 * Get detailed info about fds in both the local as well as external processes
