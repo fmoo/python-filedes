@@ -5,16 +5,16 @@ from filedes.subprocess import Popen
 from filedes import get_open_fds, FD
 from subprocess import PIPE, STDOUT
 import unittest2
-import filedes
-import socket
 import tempfile
 
 
 class RemoteFDTests(BaseFDTestCase):
     def testPipe(self):
+        import filedes
         self.checkSubprocessFDs(filedes.pipe())
 
     def testSocket(self):
+        import socket
         s = socket.socket()
         self.checkSubprocessFDs([FD(s.fileno())])
         del s
