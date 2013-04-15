@@ -6,6 +6,8 @@ import fcntl
 import socket
 
 import _filedes
+import _ancillary
+
 get_open_fds = _filedes.get_open_fds
 
 if hasattr(_filedes, "stat_pid_fd"):
@@ -219,6 +221,18 @@ class SocketHelper(object):
     def get_reuse(self):
         """Get whether SO_REUSE is set on this socket"""
         return bool(self.getopt(socket.SOL_SOCKET, self.REUSE))
+
+    def send_fd(self, fd):
+        return _ancillary.send_fd(self.fd, get_fileno(fd))
+
+    def send_fds(self, fds):
+        return _ancillary.send_fds(self.fd, [get_fileno(fd) for fd in fds])
+
+    def recv_fd(self):
+        return _ancillary.recv_fd(self.fd)
+
+    def recv_fds(self, num_fds):
+        return _ancillary.recv_fds(self.fd, num_fds)
 
 
 class RemoteFileDescriptor(_FileDescriptor):
