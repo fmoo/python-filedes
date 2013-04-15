@@ -74,3 +74,6 @@ It has been tested on the following platforms:
 
 - linux
 - OSX
+
+Developing for Darwin is tricky since there is no procfs, so some
+operations on filedescriptors in different pids may not work as desired
