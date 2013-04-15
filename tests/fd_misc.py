@@ -43,6 +43,9 @@ class CloseOnExecuteTests(BaseFDTestCase):
                 # automatically, even if there's no data in it.  Since the
                 # exception context is propagated to the test cases' tearDown,
                 # the popen's pipes will show up as a leak
+                if p.poll() is None:
+                    p.kill()
+                    self.assertEquals(p.wait(), -9)
                 del p
         finally:
             FD(r).close()
