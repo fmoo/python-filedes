@@ -15,14 +15,15 @@ PLATFORM_EXTENSIONS = {
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
-def read(fname):
+def read(*fname):
     """Read a file relative to the repository root"""
-    return open(os.path.join(ROOT, fname)).read()
+    return open(os.path.join(ROOT, *fname)).read()
 
 def version():
-    """Return the version number from filedes/__version__.py"""
-    file, pathname, description = imp.find_module('filedes', [ROOT])
-    return imp.load_module('filedes', file, pathname, description).__version__
+    """Return the version number from filedes/version.py"""
+    result = {}
+    exec read("filedes", "__version__.py") in result
+    return result['__version__']
 
 if __name__ == '__main__':
     VERSION = version()
