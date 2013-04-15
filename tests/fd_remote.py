@@ -6,6 +6,8 @@ from filedes import get_open_fds, FD
 from subprocess import PIPE, STDOUT
 import unittest2
 import tempfile
+import sys
+import select
 
 
 class RemoteFDTests(BaseFDTestCase):
@@ -34,6 +36,20 @@ class RemoteFDTests(BaseFDTestCase):
         fd.set_cloexec(False)
         self.checkSubprocessFDs([fd], close=False)
         del f
+
+    @unittest2.skipUnless(sys.platform.startswith("linux"), "requires Linux")
+    def testEpoll(self):
+        e = select.epoll()
+        fd = FD(e)
+        self.checkSubprocessFDs([fd], close=False)
+        del e
+
+    @unittest2.skipUnless(sys.platform.startswith("darwin"), "requires OSX")
+    def testKqueue(self):
+        k = select.kqueue()
+        fd = FD(k)
+        self.checkSubprocessFDs([fd], close=False)
+        del k
 
     def checkSubprocessFDs(self, check_fds, close=True):
         try:
