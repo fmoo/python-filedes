@@ -2,6 +2,7 @@
 #include <libproc.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 
 extern void init_posix(void);
@@ -11,10 +12,32 @@ extern PyObject *fsetsockopt(PyObject *self, PyObject *args);
 static PyObject *posix;
 static PyObject *stat_result;
 
+static bool
+_filedes_get_proc_fdinfo(pid_t pid, struct proc_fdinfo **procFDInfo,
+                         long *numfds) {
+    // Figure out the size of the buffer needed to hold the list of open FDs
+    int bufferSize = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, 0, 0);
+    if (bufferSize == -1) {
+        PyErr_SetString(PyExc_OSError, "Unable to get open file handles for fd");
+        return false;
+    }
+
+    // Get the list of open FDs
+    *procFDInfo = (struct proc_fdinfo *)malloc(bufferSize);
+    if (!procFDInfo) {
+        PyErr_SetString(PyExc_MemoryError, "Error allocating memory for fdinfo buffer");
+        return false;
+    }
+
+    int bufferUsed = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, *procFDInfo, bufferSize);
+    *numfds = bufferUsed / PROC_PIDLISTFD_SIZE;
+    return true;
+}
+
 static PyObject *
 filedes_get_open_fds(PyObject *self, PyObject *args)
 {
-    int pid = -1;
+    pid_t pid = -1;
 
     if (!PyArg_ParseTuple(args, "|i", &pid))
         return NULL;
@@ -31,21 +54,19 @@ filedes_get_open_fds(PyObject *self, PyObject *args)
     }
 
     // Get the list of open FDs
-    struct proc_fdinfo *procFDInfo = (struct proc_fdinfo *)malloc(bufferSize);
-    if (!procFDInfo) {
-        PyErr_SetString(PyExc_MemoryError, "Error allocating memory for fdinfo buffer");
+    struct proc_fdinfo *procFDInfo;
+    long numberOfProcFDs;
+
+    if (!_filedes_get_proc_fdinfo(pid, &procFDInfo, &numberOfProcFDs)) {
         return NULL;
     }
-
-    int bufferUsed = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, procFDInfo, bufferSize);
-    int numberOfProcFDs = bufferUsed / PROC_PIDLISTFD_SIZE;
 
     PyObject *result = Py_BuildValue("[]");
     if (!result) {
         goto cleanup_error;
     }
 
-    int i;
+    long i;
     for(i = 0; i < numberOfProcFDs; i++) {
         //printf("FD #%d: %d\n", procFDInfo[i].proc_fd, procFDInfo[i].proc_fdtype);
         PyObject *ifd = Py_BuildValue("i", procFDInfo[i].proc_fd);
@@ -78,7 +99,7 @@ filedes_stat_pid_fd(PyObject *self, PyObject *args)
         return NULL;
 
     struct vnode_fdinfo vnodeinfo;
-    int bufferUsed = proc_pidfdinfo(pid, fd, PROC_PIDFDVNODEINFO, 
+    int bufferUsed = proc_pidfdinfo(pid, fd, PROC_PIDFDVNODEINFO,
                                     &vnodeinfo, PROC_PIDFDVNODEINFO_SIZE);
     if (bufferUsed != PROC_PIDFDVNODEINFO_SIZE) {
       return NULL;
