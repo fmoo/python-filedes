@@ -245,7 +245,7 @@ def FD(fd, pid=None):
 
 
 def pipe():
-    return (FD(fd) for fd in os.pipe())
+    return tuple(FD(fd) for fd in os.pipe())
 
 
 if __name__ == '__main__':

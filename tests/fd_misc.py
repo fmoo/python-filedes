@@ -61,6 +61,16 @@ class PipeTests(BaseFDTestCase):
         r.close()
         w.close()
 
+    def testIterateTwice(self):
+        it = filedes.pipe()
+        l1 = list(it)
+        l2 = list(it)
+        try:
+            self.assertItemsEqual(l1, l2)
+        finally:
+            for fd in l1:
+                fd.close()
+
 
 class DupTests(BaseFDTestCase):
     def dupTestCommon(self, r, w, r2):
