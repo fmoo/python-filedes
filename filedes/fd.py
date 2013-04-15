@@ -199,6 +199,8 @@ class LocalFileDescriptor(_FileDescriptor):
 
 
 class SocketHelper(object):
+    REUSE = getattr(socket, 'SO_REUSEPORT', socket.SO_REUSEADDR)
+
     def __init__(self, fd):
         self.fd = int(fd)
 
@@ -212,11 +214,11 @@ class SocketHelper(object):
 
     def set_reuse(self, value=True):
         """Enable SO_REUSE on this socket"""
-        return self.setopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, value)
+        return self.setopt(socket.SOL_SOCKET, self.REUSE, value)
 
     def get_reuse(self):
         """Get whether SO_REUSE is set on this socket"""
-        return bool(self.getopt(socket.SOL_SOCKET, socket.SO_REUSEADDR))
+        return bool(self.getopt(socket.SOL_SOCKET, self.REUSE))
 
 
 class RemoteFileDescriptor(_FileDescriptor):
