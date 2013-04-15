@@ -5,6 +5,7 @@ from filedes.subprocess import Popen
 from filedes import get_open_fds
 from subprocess import PIPE, STDOUT
 import filedes
+import unittest2
 
 
 class SubprocessTests(BaseFDTestCase):
@@ -43,3 +44,7 @@ class SubprocessTests(BaseFDTestCase):
         finally:
             r.close()
             w.close()
+
+
+if __name__ == '__main__':
+    unittest2.main()

@@ -1,5 +1,6 @@
 from filedes.test.base import BaseFDTestCase
 import os
+import unittest2
 
 
 class TestFDTypes(BaseFDTestCase):
@@ -15,3 +16,7 @@ class TestFDTypes(BaseFDTestCase):
 
         os.close(r)
         os.close(w)
+
+
+if __name__ == '__main__':
+    unittest2.main()

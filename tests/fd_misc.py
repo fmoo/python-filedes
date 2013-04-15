@@ -3,6 +3,7 @@ from filedes import FD, get_open_fds, LocalFileDescriptor
 from subprocess import Popen, PIPE, STDOUT
 import os
 import filedes
+import unittest2
 
 
 class CloseOnExecuteTests(BaseFDTestCase):
@@ -90,3 +91,7 @@ class DupTests(BaseFDTestCase):
         r, w = filedes.pipe()
         r2 = r.dup(63)
         self.dupTestCommon(r, w, r2)
+
+
+if __name__ == '__main__':
+    unittest2.main()

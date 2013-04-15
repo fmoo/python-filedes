@@ -2,6 +2,7 @@ from filedes.test.base import BaseFDTestCase
 from filedes import FD
 import os
 import errno
+import unittest2
 
 
 class TestFDIO(BaseFDTestCase):
@@ -34,3 +35,6 @@ class TestFDIO(BaseFDTestCase):
         finally:
             fr.close()
             FD(w).close()
+
+if __name__ == '__main__':
+    unittest2.main()
