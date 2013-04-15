@@ -98,36 +98,93 @@ filedes_stat_pid_fd(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "ii", &pid, &fd))
         return NULL;
 
-    struct vnode_fdinfo vnodeinfo;
-    int bufferUsed = proc_pidfdinfo(pid, fd, PROC_PIDFDVNODEINFO,
-                                    &vnodeinfo, PROC_PIDFDVNODEINFO_SIZE);
-    if (bufferUsed != PROC_PIDFDVNODEINFO_SIZE) {
-      return NULL;
+    // Get the list of open FDs
+    struct proc_fdinfo *procFDInfo;
+    long numberOfProcFDs;
+    if (!_filedes_get_proc_fdinfo(pid, &procFDInfo, &numberOfProcFDs)) {
+        return NULL;
     }
 
-    PyObject *start_args = Py_BuildValue("((iiiiiillll))",
-        vnodeinfo.pvi.vi_stat.vst_mode,
-        vnodeinfo.pvi.vi_stat.vst_ino,
-        vnodeinfo.pvi.vi_stat.vst_dev,
-        vnodeinfo.pvi.vi_stat.vst_nlink,
-        vnodeinfo.pvi.vi_stat.vst_uid,
-        vnodeinfo.pvi.vi_stat.vst_gid,
-        vnodeinfo.pvi.vi_stat.vst_size,
-        vnodeinfo.pvi.vi_stat.vst_atime,
-        vnodeinfo.pvi.vi_stat.vst_mtime,
-        vnodeinfo.pvi.vi_stat.vst_ctime
+    // Find the requested FD in the process' fds in order to get the
+    // appropriate fdtype.  Default to VNODE.
+    uint32_t proc_fdtype = PROX_FDTYPE_VNODE;
+    int i;
+    for (i = 0; i < numberOfProcFDs; i++) {
+        if (procFDInfo[i].proc_fd == fd) {
+            proc_fdtype = procFDInfo[i].proc_fdtype;
+        }
+    }
+
+    struct vinfo_stat stat;
+    PyObject *result = NULL,
+             *start_args = NULL;
+    switch (proc_fdtype) {
+    case PROX_FDTYPE_SOCKET:
+        {
+            struct socket_fdinfo sockinfo;
+            int bufferUsed = proc_pidfdinfo(pid, fd, PROC_PIDFDSOCKETINFO,
+                  &sockinfo, PROC_PIDFDSOCKETINFO_SIZE);
+            if (bufferUsed != PROC_PIDFDSOCKETINFO_SIZE) {
+                goto cleanup_filedes_stat_pid_fd;
+            }
+            stat = sockinfo.psi.soi_stat;
+        }
+        break;
+
+    case PROX_FDTYPE_PIPE:
+        {
+            struct pipe_fdinfo pipeinfo;
+            int bufferUsed = proc_pidfdinfo(pid, fd, PROC_PIDFDPIPEINFO,
+                  &pipeinfo, PROC_PIDFDPIPEINFO_SIZE);
+            if (bufferUsed != PROC_PIDFDPIPEINFO_SIZE) {
+                goto cleanup_filedes_stat_pid_fd;
+            }
+            stat = pipeinfo.pipeinfo.pipe_stat;
+        }
+        break;
+
+    case PROX_FDTYPE_KQUEUE:
+        goto cleanup_filedes_stat_pid_fd;
+
+    default:
+        // This should be the default, but it doesnt work for
+        // procFDInfo[i].proc_fdtype IN
+        // (PROX_FDTYPE_PIPE, PROX_FDTYPE_KQUEUE, PROX_FDTYPE_SOCKET)
+        {
+            struct vnode_fdinfo vnodeinfo;
+            int bufferUsed = proc_pidfdinfo(pid, fd, PROC_PIDFDVNODEINFO,
+                  &vnodeinfo, PROC_PIDFDVNODEINFO_SIZE);
+            if (bufferUsed != PROC_PIDFDVNODEINFO_SIZE) {
+                goto cleanup_filedes_stat_pid_fd;
+            }
+            stat = vnodeinfo.pvi.vi_stat;
+        }
+    }
+
+    start_args = Py_BuildValue("((iiiiiillll))",
+        stat.vst_mode,
+        stat.vst_ino,
+        stat.vst_dev,
+        stat.vst_nlink,
+        stat.vst_uid,
+        stat.vst_gid,
+        stat.vst_size,
+        stat.vst_atime,
+        stat.vst_mtime,
+        stat.vst_ctime
     );
     if (!start_args) {
-      return NULL;
+        goto cleanup_filedes_stat_pid_fd;
     }
 
-    PyObject *result = PyObject_CallObject(stat_result, start_args);
+    result = PyObject_CallObject(stat_result, start_args);
     if (!result) {
-      Py_XDECREF(start_args);
-      return NULL;
+        goto cleanup_filedes_stat_pid_fd;
     }
 
+cleanup_filedes_stat_pid_fd:
     Py_XDECREF(start_args);
+    free(procFDInfo);
     return result;
 }
 
