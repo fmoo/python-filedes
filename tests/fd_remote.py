@@ -48,8 +48,10 @@ class RemoteFDTests(BaseFDTestCase):
     def testKqueue(self):
         k = select.kqueue()
         fd = FD(k)
-        self.checkSubprocessFDs([fd], close=False)
-        del k
+        try:
+            self.checkSubprocessFDs([fd], close=False)
+        finally:
+            del k
 
     def checkSubprocessFDs(self, check_fds, close=True):
         try:
@@ -88,7 +90,6 @@ class RemoteFDTests(BaseFDTestCase):
             if close:
                 for fd in check_fds:
                     fd.close()
-
 
 
 if __name__ == '__main__':
