@@ -39,17 +39,23 @@ Listing the open FDs and their types of the current PID:
   for fd in get_open_fds():
       print fd, FD(fd).typestr
 
-Sending a PIPE to another process over a unix socket
+Sending fds to another process over a unix socket
 
 .. code:: python
 
   from filedes import FD
 
-  # For a single FD
+  # Send a single FD
   FD(sock).socket.send_fd(an_fd)
 
   # Or for multiple FDs
   FD(sock).socket.send_fds(multiple_fds)
+
+  # To receive one fd (in a different pid)
+  an_fd = FD(sock).socket.recv_fd()
+
+  # To receive multiple fds (in a different pid)
+  two_fds = FD(sock).socket.recv_fds(2)
 
 
 Key features
