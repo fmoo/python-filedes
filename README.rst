@@ -58,22 +58,38 @@ Sending fds to another process over a unix socket
   two_fds = FD(sock).socket.recv_fds(2)
 
 
-Key features
-============
-* Get detailed info about fds in both the local as well as external processes
-* Perform fcntl and io operations directly on descriptor objects
+Additional Features
+-------------------
+* Get detailed info about fds of external processes (parent, etc)
+* Perform fcntl and ioctl operations directly on descriptor objects
 * Unittest helper class for making sure your tests don't leak fds or threads.
-* Set various fd flags in a more native way, such as `fd.set_cloexec()` or `fd.set_nonblocking()`
-* Socket helpers let you set socket options in a more native way, such as `fd.socket.set_reuse()`
 * A Popen() subclass with a more intelligent `close_fds` for systems with a high fs.file-max set
 
 Platforms
 =========
-fdinfo is primarily developed on linux, but it doesn't work just there.
+fdinfo is primarily developed on Linux, but it doesn't work just there.
 It has been tested on the following platforms:
 
-- linux
+- Linux
 - OSX
 
 Developing for Darwin is tricky since there is no procfs, so some
-operations on filedescriptors in different pids may not work as desired
+operations on filedescriptors in different pids may not work as desired.
+
+This library has been tested with python2.7
+
+Technical Ramblings
+===================
+Accessing explicit fd metadata is surprisingly nontrivial, so this library
+ships with a CPython extension that varies by the platform it's built on.
+
+Even on Linux, where you have the insanely versatile procfs, doing a naive
+os.listdir() on the /proc/{os.getpid()}/fd will include the fd of the diropen()
+call.  And since there's no low-level diropen API in python itself, an
+extension is required to remove the FD without relying on stat()ing each file
+in order to see which one returns an EBADF.
+
+Darwin/OSX is trickier, since there's no procfs.  If you look into the lsof
+source code, you will eventually make your way to BSD's native `libproc` API.
+While this library  is incredibly powerful, there's definitely no API for this
+native functionality in Python
