@@ -161,7 +161,7 @@ filedes_stat_pid_fd(PyObject *self, PyObject *args)
         }
     }
 
-    start_args = Py_BuildValue("((iiiiiillll))",
+    start_args = Py_BuildValue("((iiliiillll))",
         stat.vst_mode,
         stat.vst_ino,
         stat.vst_dev,
