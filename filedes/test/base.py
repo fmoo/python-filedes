@@ -21,6 +21,7 @@ class BaseFDTestCase(unittest2.TestCase):
         super(BaseFDTestCase, cls).setUpClass()
 
     def setUp(self):
+        super(BaseFDTestCase, self).setUp()
         # Implement setUpClass for old pythons
         if not hasattr(unittest.TestCase, 'setUpClass'):
             cls = self.__class__
@@ -47,6 +48,7 @@ class BaseFDTestCase(unittest2.TestCase):
                 cls._unittest2_setup -= 1
             if cls._unittest2_setup == 0:
                 cls.tearDownClass()
+        super(BaseFDTestCase, self).tearDown()
 
     def assertContains(self, item, arr, msg=''):
         return self.assertIn(item, arr, msg)
